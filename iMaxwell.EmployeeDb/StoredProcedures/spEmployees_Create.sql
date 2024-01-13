@@ -4,7 +4,6 @@
 	@Title nvarchar(50),
 	@Salary money,
 	@HireDate datetime2,
-	@ExitDate datetime2,
 	@ManagerId int,
 	@DepartmentId int,
 	@Id int OUTPUT
@@ -17,7 +16,6 @@ BEGIN
 		[Title],
 		[Salary],
 		[HireDate],
-		[ExitDate],
 		[ManagerId],
 		[DepartmentId],
 		[IsCurrent]
@@ -29,7 +27,6 @@ BEGIN
 		@Title,
 		@Salary,
 		@HireDate,
-		@ExitDate,
 		@ManagerId,
 		@DepartmentId,
 		1

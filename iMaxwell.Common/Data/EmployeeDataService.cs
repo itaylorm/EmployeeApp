@@ -49,6 +49,12 @@ public class EmployeeDataService : IEmployeeDataService
 
     public async Task<int> CreateEmployee(IEmployeeModel employee)
     {
+        if(employee.FirstName == "string") throw new ArgumentException("First Name is required", nameof(employee.FirstName));
+        if(employee.LastName == "string") throw new ArgumentException("Last Name is required", nameof(employee.LastName));
+        if(employee.Title == "string") throw new ArgumentException("Title is required", nameof(employee.Title));
+        if(employee.DepartmentId == 0) throw new ArgumentException("Department is required", nameof(employee.DepartmentId));
+        if(employee.ManagerId == 0) throw new ArgumentException("Manager is required", nameof(employee.ManagerId));
+
         int id = await _sql.AddDataAsync("dbo.spEmployees_Create",
             new
             {
@@ -57,10 +63,9 @@ public class EmployeeDataService : IEmployeeDataService
                 employee.LastName,
                 employee.Title,
                 employee.DepartmentId,
+                employee.ManagerId,
                 employee.HireDate,
                 employee.Salary,
-                employee.IsCurrent,
-                employee.ExitDate
             }, "Id", ConnectionStringName);
         if (id != -1)
         {
