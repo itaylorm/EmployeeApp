@@ -80,7 +80,7 @@ public class EmployeeDataService : IEmployeeDataService
 
     public async Task ExitEmployee(int id)
     {
-        await _sql.SaveDataAsync("dbo.spEmployees_Exit", new { Id = id }, ConnectionStringName);
+        await _sql.SaveDataAsync("dbo.spEmployees_Exit", new { Id = id, ExitDate = DateTime.UtcNow }, ConnectionStringName);
     }
 
     public async Task UpdateEmployeeSalary(int id, double salary)

@@ -72,19 +72,19 @@ public class EmployeesController : ControllerBase
 
     }
 
-    // PUT api/v1/Employees/5
-    [HttpPut("{id}", Name ="UpdateSalary")]
+    // PUT api/v1/Employees/5/UpdateSalary
+    [HttpPut("{id}/UpdateSalary")]
     public async Task<IActionResult> UpdateSalary(int id, [FromBody] double salary)
     {
         try
         {
-            _log.LogInformation("PUT: api/v1/employees/updatesalary/{id} (Salary: {double} for id: {Id}", id ,salary, id);
+            _log.LogInformation("PUT: api/v1/employees/{id}/updatesalary (Salary: {double} for id: {Id}", id ,salary, id);
             await _data.UpdateEmployeeSalary(id, salary);
             return Ok();
         }
         catch (Exception ex)
         {
-            _log.LogError(ex, "The PUT call to api/v1/Employees/{Id} failed. The value was {Salary}",
+            _log.LogError(ex, "The PUT call to api/v1/Employees/{Id}/updatesalary failed. The value was {Salary}",
                 id, salary);
             return BadRequest();
         }

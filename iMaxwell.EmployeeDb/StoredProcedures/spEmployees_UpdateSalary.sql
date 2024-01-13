@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[spEmployees_Update]
+﻿CREATE PROCEDURE [dbo].[spEmployees_UpdateSalary]
 @Id int,
 @Salary money
 AS

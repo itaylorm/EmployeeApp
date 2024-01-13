@@ -34,7 +34,7 @@ public class DepartmentDataService : IDepartmentDataService
 
     public async Task<int> CreateDepartment(IDepartmentModel department)
     {
-        int id = await _sql.AddDataAsync("dbo.spEmployees_Create",
+        int id = await _sql.AddDataAsync("dbo.spDepartments_Create",
             new { Id = -1, department.Name }, "Id", ConnectionStringName);
         if (id != -1)
         {
