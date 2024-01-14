@@ -1,5 +1,7 @@
 ﻿using iMaxwell.Common.Models;
 using System;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace iMaxwell.EmployeeClient.Models
 {
@@ -7,12 +9,22 @@ namespace iMaxwell.EmployeeClient.Models
     {
         public int Id { get; set; }
 
+        [Required(ErrorMessage = "The First Name is required")]
+        [MinLength(5, ErrorMessage = "The first name is not long enough")]
         public string? FirstName { get; set; }
 
+        [Required(ErrorMessage = "The Last Name is required")]
+        [DisplayName("Last Name")]
+        [MinLength(5, ErrorMessage = "The last name is not long enough")]
         public string? LastName { get; set; }
 
+        [Required(ErrorMessage = "The Title is required")]
+        [DisplayName("Title")]
+        [MinLength(5, ErrorMessage = "The title is not long enough")]
         public string? Title { get; set; }
 
+        [Required(ErrorMessage = "The Yearly Salary is required")]
+        [DisplayName("Yearly Salary")]
         public double? Salary { get; set; }
 
         public string SalaryAsCurrency() => Salary.HasValue && Salary > 0 ? $"{Salary.Value.ToString("C")}/yr" : "Unknown";
@@ -21,6 +33,8 @@ namespace iMaxwell.EmployeeClient.Models
 
         public int DepartmentId { get; set; }
 
+        [Required(ErrorMessage = "The Hire Date is required")]
+        [DisplayName("Hire Date")]
         public DateTime HireDate { get; set; }
 
         public DateTime? ExitDate { get; set; }

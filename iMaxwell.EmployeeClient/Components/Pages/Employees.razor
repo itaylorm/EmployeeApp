@@ -9,6 +9,7 @@
 @inject ILogger<Employees> log
 
 <div class="h1">Employees</div>
+<div><button class="btn btn-primary mb-5" @onclick="AddEmployee">Add Employee</button></div>
 
 @if(!string.IsNullOrEmpty(errorMessage))
 {
@@ -16,34 +17,81 @@
         @errorMessage
     </div>
 }
-else if(employees != null && employees.Any())
+else if(employees != null && employees.Any() || currentEmployee != null)
 {
-    <QuickGrid Items="@employees">
-        <TemplateColumn Title="First Name" SortBy="@sortByFirstName">
-            <div class="flex-column items-center">@context.FirstName</div>
-        </TemplateColumn>
-        <TemplateColumn Title="Last Name" SortBy="@sortByLastName">
-            <div class="flex-column items-center">@context.LastName</div>
-        </TemplateColumn>
-        <TemplateColumn Title="Title" SortBy="@sortByTitle">
-            <div class="flex-column items-center">@context.Title</div>
-        </TemplateColumn>
-        <TemplateColumn Title="Salary" SortBy="@sortBySalary">
-            <div class="flex-column items-center">@context.SalaryAsCurrency()</div>
-        </TemplateColumn>
-        <TemplateColumn Title="Actions">
-            <div class="flex-column items-center">
-                <button class="btn btn-primary" @onclick="()=>EditEmployee(context)">Edit</button>
-                <button class="btn btn-danger" @onclick="()=>ExitEmployee(context)">Exit</button>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-7">
+                <QuickGrid Items="@employees">
+                    <TemplateColumn Title="First Name" SortBy="@sortByFirstName">
+                        <div class="flex-column items-center">@context.FirstName</div>
+                    </TemplateColumn>
+                    <TemplateColumn Title="Last Name" SortBy="@sortByLastName">
+                        <div class="flex-column items-center">@context.LastName</div>
+                    </TemplateColumn>
+                    <TemplateColumn Title="Title" SortBy="@sortByTitle">
+                        <div class="flex-column items-center">@context.Title</div>
+                    </TemplateColumn>
+                    <TemplateColumn Title="Salary" SortBy="@sortBySalary">
+                        <div class="flex-column items-center">@context.SalaryAsCurrency()</div>
+                    </TemplateColumn>
+                    <TemplateColumn Title="Actions">
+                        <div class="flex-column items-center">
+                            <button class="btn btn-primary" @onclick="()=>EditEmployee(context)">Edit</button>
+                            <button class="btn btn-danger" @onclick="()=>ExitEmployee(context)">Exit</button>
+                        </div>
+                    </TemplateColumn>
+                </QuickGrid>
             </div>
-        </TemplateColumn>
-@*         <PropertyColumn Title="First Name" Property="@(p=>p.FirstName)" Sortable="true"/>
-        <PropertyColumn Title="Last Name" Property="@(p=>p.LastName)" Sortable="true" />
-        <PropertyColumn Title="Title" Property="@(p=>p.Title)" Sortable="true" />
-        <PropertyColumn Title="Salary" Property="@(p=>p.Salary)" Sortable="true" />
-        <PropertyColumn Title="Hire Date" Property="@(p=>p.HireDate)" Sortable="true" />
-        <PropertyColumn Title="Is Current" Property="@(p=>p.IsCurrent)" Sortable="true" /> *@
-    </QuickGrid>
+            <div class="col">
+                @if(currentEmployee != null)
+                {
+                    <div class="container">
+                        <div class="h2 text-center">Edit Employee</div>
+                        <EditForm Enhance Model="currentEmployee" method="POST" FormName="employeeForm" OnValidSubmit="SaveChanges">
+                            <DataAnnotationsValidator />
+                            <div class="row">
+                                <div class="mb-3 col-6 form-floating">
+                                    <InputText class="form-control text-primary" id="firstName" @bind-Value="currentEmployee.FirstName" />
+                                    <label for="firstName" class="form-label text-primary ps-3">First Name</label>
+                                    <ValidationMessage For="@(() => currentEmployee.FirstName)" />
+                                </div>
+                                <div class="mb-3 col-6 form-floating">
+                                    <InputText class="form-control text-primary" id="lastName" @bind-Value="currentEmployee.LastName" />
+                                    <label for="lastName" class="form-label text-primary ps-3">Last Name</label>
+                                    <ValidationMessage For="@(() => currentEmployee.LastName)" />
+                                </div>
+                                    <div class="mb-3 col-6 form-floating">
+                                        <InputText class="form-control text-primary" id="title" @bind-Value="currentEmployee.Title" />
+                                        <label for="title" class="form-label text-primary ps-3">Title</label>
+                                        <ValidationMessage For="@(() => currentEmployee.Title)" />
+                                    </div>
+                                    <div class="mb-3 col-6 form-floating">
+                                        <InputNumber class="form-control text-primary" id="salary" @bind-Value="currentEmployee.Salary" />
+                                        <label for="salary" class="form-label text-primary ps-3">Yearly Salary</label>
+                                        <ValidationMessage For="@(() => currentEmployee.Salary)" />
+                                    </div>
+                                    <div class="mb-3 col-4 form-floating">
+                                        <InputDate class="form-control text-primary" id="hiredate" @bind-Value="currentEmployee.HireDate" />
+                                        <label for="hiredate" class="form-label text-primary ps-3">Hire Date</label>
+                                    </div>
+                                    <div class="mb-3 col-4 form-floating">
+                                        <InputDate class="form-control text-primary" id="exitDate" @bind-Value="currentEmployee.ExitDate" />
+                                        <label for="exitdate" class="form-label text-primary ps-3">Exit Date</label>
+                                    </div>
+                                    <div class="pt-3 col-3">
+                                    <InputCheckbox class="form-check-input text-primary" @bind-Value="currentEmployee.IsCurrent" />
+                                    <label class="form-check-label text-primary ps-3">Is Current</label>
+                                    </div>
+                            </div>
+                            <button class="btn btn-danger" @onclick="CancelChanges">Cancel Changes</button>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </EditForm>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
 }
 else if(employees != null && !employees.Any())
 {
@@ -62,7 +110,7 @@ else
     private IQueryable<Employee>? employees;
     private HttpClient? client;
     private string? errorMessage;
-    private Employee? currentItem;
+    private Employee? currentEmployee;
 
     GridSort<Employee> sortByFirstName = GridSort<Employee>
      .ByDescending(p => p.FirstName);
@@ -80,9 +128,6 @@ else
     protected override async Task OnInitializedAsync()
     {
         await GetEmployees();
-        if(employees != null && employees.Any()) {
-            currentItem = employees.FirstOrDefault() ?? new Employee();
-        }
     }
 
     private async Task GetEmployees()
@@ -109,13 +154,29 @@ else
         await InvokeAsync(StateHasChanged);
     }
 
+    private void AddEmployee()
+    {
+        currentEmployee = new Employee();
+    }
+
     private void EditEmployee(Employee employee)
     {
-        currentItem = employee;
+        currentEmployee = employee;
     }
 
     private void ExitEmployee(Employee employee)
     {
-        currentItem = employee;
+        currentEmployee = employee;
+    }
+
+    private void SaveChanges()
+    {
+        log.LogInformation("Person: {FirstName} {LastName}", currentEmployee?.FirstName, currentEmployee?.LastName);
+        currentEmployee = null;
+    }
+
+    private void CancelChanges()
+    {
+        currentEmployee = null;
     }
 }
