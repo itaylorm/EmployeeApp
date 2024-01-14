@@ -1,0 +1,121 @@
+﻿@page "/employees"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using iMaxwell.EmployeeClient.Models
+@using System.Net.Http.Headers
+@using System.Net.Http.Json
+@inject IHttpClientFactory factory
+@inject TokenModel tokenInfo
+@inject ILogger<Employees> log
+
+<div class="h1">Employees</div>
+
+@if(!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @errorMessage
+    </div>
+}
+else if(employees != null && employees.Any())
+{
+    <QuickGrid Items="@employees">
+        <TemplateColumn Title="First Name" SortBy="@sortByFirstName">
+            <div class="flex-column items-center">@context.FirstName</div>
+        </TemplateColumn>
+        <TemplateColumn Title="Last Name" SortBy="@sortByLastName">
+            <div class="flex-column items-center">@context.LastName</div>
+        </TemplateColumn>
+        <TemplateColumn Title="Title" SortBy="@sortByTitle">
+            <div class="flex-column items-center">@context.Title</div>
+        </TemplateColumn>
+        <TemplateColumn Title="Salary" SortBy="@sortBySalary">
+            <div class="flex-column items-center">@context.SalaryAsCurrency()</div>
+        </TemplateColumn>
+        <TemplateColumn Title="Actions">
+            <div class="flex-column items-center">
+                <button class="btn btn-primary" @onclick="()=>EditEmployee(context)">Edit</button>
+                <button class="btn btn-danger" @onclick="()=>ExitEmployee(context)">Exit</button>
+            </div>
+        </TemplateColumn>
+@*         <PropertyColumn Title="First Name" Property="@(p=>p.FirstName)" Sortable="true"/>
+        <PropertyColumn Title="Last Name" Property="@(p=>p.LastName)" Sortable="true" />
+        <PropertyColumn Title="Title" Property="@(p=>p.Title)" Sortable="true" />
+        <PropertyColumn Title="Salary" Property="@(p=>p.Salary)" Sortable="true" />
+        <PropertyColumn Title="Hire Date" Property="@(p=>p.HireDate)" Sortable="true" />
+        <PropertyColumn Title="Is Current" Property="@(p=>p.IsCurrent)" Sortable="true" /> *@
+    </QuickGrid>
+}
+else if(employees != null && !employees.Any())
+{
+    <div class="alert alert-warning text" role="alert">
+        No Employees Found
+    </div>
+}
+else
+{
+    <div class="alert alert-success text" role="alert">
+        Loading Employees...
+    </div>
+}
+
+@code {
+    private IQueryable<Employee>? employees;
+    private HttpClient? client;
+    private string? errorMessage;
+    private Employee? currentItem;
+
+    GridSort<Employee> sortByFirstName = GridSort<Employee>
+     .ByDescending(p => p.FirstName);
+
+    GridSort<Employee> sortByLastName = GridSort<Employee>
+        .ByDescending(p => p.LastName);
+
+    GridSort<Employee> sortByTitle = GridSort<Employee>
+    .ByDescending(p => p.Title);
+
+    GridSort<Employee> sortBySalary = GridSort<Employee>
+     .ByDescending(p => p.Salary);
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetEmployees();
+        if(employees != null && employees.Any()) {
+            currentItem = employees.FirstOrDefault() ?? new Employee();
+        }
+    }
+
+    private async Task GetEmployees()
+    {
+        errorMessage = string.Empty;
+        employees = null;
+        client = factory.CreateClient("api");
+        client.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", tokenInfo.Token);
+
+        try
+        {
+            var returnedEmployees = await client.GetFromJsonAsync<List<Employee>>("employees");
+            if(returnedEmployees != null)
+            {
+                employees = returnedEmployees.AsQueryable();
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+            log.LogError(ex, "Error getting employees");
+        }
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void EditEmployee(Employee employee)
+    {
+        currentItem = employee;
+    }
+
+    private void ExitEmployee(Employee employee)
+    {
+        currentItem = employee;
+    }
+}

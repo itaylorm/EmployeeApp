@@ -13,4 +13,5 @@ begin
 		[DepartmentId],
 		[IsCurrent]
 	FROM [dbo].[Employees]
+	Order by [LastName], [FirstName]
 end
