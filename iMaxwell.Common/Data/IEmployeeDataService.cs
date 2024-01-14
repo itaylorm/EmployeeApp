@@ -8,5 +8,5 @@ public interface IEmployeeDataService
     Task ExitEmployee(int id);
     Task<IEmployeeModel?> GetEmployeeById(int id);
     Task<List<IEmployeeModel>?> GetEmployees();
-    Task UpdateEmployeeSalary(int id, double salary);
+    Task UpdateEmployee(EmployeeModel employee);
 }

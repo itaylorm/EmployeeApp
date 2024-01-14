@@ -78,13 +78,22 @@ public class EmployeeDataService : IEmployeeDataService
         return id;
     }
 
+    public async Task UpdateEmployee(EmployeeModel employee)
+    {
+        await _sql.SaveDataAsync("dbo.spEmployees_Update", new 
+        { 
+            employee.Id,
+            employee.FirstName,
+            employee.LastName,
+            employee.Title,
+            employee.DepartmentId,
+            employee.ManagerId,
+            employee.HireDate,
+            employee.Salary
+        }, ConnectionStringName);
+    }
     public async Task ExitEmployee(int id)
     {
         await _sql.SaveDataAsync("dbo.spEmployees_Exit", new { Id = id, ExitDate = DateTime.UtcNow }, ConnectionStringName);
-    }
-
-    public async Task UpdateEmployeeSalary(int id, double salary)
-    {
-        await _sql.SaveDataAsync("dbo.spEmployees_UpdateSalary", new { Id = id, Salary = salary }, ConnectionStringName);
     }
 }

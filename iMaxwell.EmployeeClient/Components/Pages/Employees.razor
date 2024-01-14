@@ -1,6 +1,7 @@
 ﻿@page "/employees"
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 @using Microsoft.AspNetCore.Components.QuickGrid
+@using Newtonsoft.Json
 @using iMaxwell.EmployeeClient.Models
 @using System.Net.Http.Headers
 @using System.Net.Http.Json
@@ -9,7 +10,7 @@
 @inject ILogger<Employees> log
 
 <div class="h1">Employees</div>
-<div><button class="btn btn-primary mb-5" @onclick="AddEmployee">Add Employee</button></div>
+<div><button class="btn btn-primary mb-5" @onclick="StartAddEmployee">Add Employee</button></div>
 
 @if(!string.IsNullOrEmpty(errorMessage))
 {
@@ -37,7 +38,7 @@ else if(employees != null && employees.Any() || currentEmployee != null)
                     </TemplateColumn>
                     <TemplateColumn Title="Actions">
                         <div class="flex-column items-center">
-                            <button class="btn btn-primary" @onclick="()=>EditEmployee(context)">Edit</button>
+                            <button class="btn btn-primary" @onclick="()=>StartEditEmployee(context)">Edit</button>
                             <button class="btn btn-danger" @onclick="()=>ExitEmployee(context)">Exit</button>
                         </div>
                     </TemplateColumn>
@@ -188,13 +189,13 @@ else
         await InvokeAsync(StateHasChanged);
     }
 
-    private void AddEmployee()
+    private void StartAddEmployee()
     {
         submitText = "Add Employee";
         currentEmployee = new Employee();
     }
 
-    private void EditEmployee(Employee employee)
+    private void StartEditEmployee(Employee employee)
     {
         submitText = "Save Changes";
         currentEmployee = employee;
@@ -205,10 +206,125 @@ else
         currentEmployee = employee;
     }
 
-    private void SaveChanges()
+    private async Task SaveChanges()
     {
-        log.LogInformation("Person: {FirstName} {LastName}", currentEmployee?.FirstName, currentEmployee?.LastName);
-        currentEmployee = null;
+        if(currentEmployee != null && currentEmployee.Id == 0)
+        {
+            await AddEmployee();
+        }
+        else
+        {
+            await UpdateEmployee();
+        }
+    }
+
+    private async Task AddEmployee()
+    {
+        errorMessage = string.Empty;
+        employees = null;
+        client = factory.CreateClient("api");
+        client.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", tokenInfo.Token);
+
+        try
+        {
+            if (currentEmployee != null)
+            {
+                var matchingEmployee = employees?.FirstOrDefault(e => e.FirstName == currentEmployee.FirstName && e.LastName == currentEmployee.LastName);
+                if(matchingEmployee != null)
+                {
+                    errorMessage = "Employee already exists";
+                    log.LogError("Unable to add {Employee} because it already exists", currentEmployee);
+                    return;
+                }
+
+                var response = await client.PostAsJsonAsync<dynamic>("employees",
+                new
+                {
+                    currentEmployee?.FirstName,
+                    currentEmployee?.LastName,
+                    currentEmployee?.Title,
+                    currentEmployee?.Salary,
+                    currentEmployee?.HireDate,
+                    currentEmployee?.DepartmentId,
+                    currentEmployee?.ManagerId
+                });
+
+                if(response.IsSuccessStatusCode)
+                {
+                    var newEmployee = await response.Content.ReadFromJsonAsync<dynamic>();
+                    var employee = JsonConvert.DeserializeObject<Employee>(newEmployee.ToString());
+                    currentEmployee.Id = employee.Id;
+
+                    if(employees == null)
+                    {
+                        employees = new List<Employee>().AsQueryable();
+                    };
+
+                    employees.Append(currentEmployee);
+
+                    log.LogInformation("Added {Employee}", currentEmployee);
+                    currentEmployee = null;
+                    StateHasChanged();
+                }
+                else {
+                    errorMessage = "Unable to add employee";
+                    log.LogError("Unable to add {Employee} with reason {Reason}", currentEmployee, response.ReasonPhrase);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+            log.LogError(ex, "Error adding {Employee}", currentEmployee);
+        }
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task UpdateEmployee()
+    {
+        errorMessage = string.Empty;
+        employees = null;
+        client = factory.CreateClient("api");
+        client.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", tokenInfo.Token);
+
+        try
+        {
+            if (currentEmployee != null)
+            {
+                var response = await client.PutAsJsonAsync<dynamic>($"employees/{currentEmployee.Id}",
+                new
+                {
+                    currentEmployee?.Id,
+                    currentEmployee?.FirstName,
+                    currentEmployee?.LastName,
+                    currentEmployee?.Title,
+                    currentEmployee?.Salary,
+                    currentEmployee?.HireDate,
+                    currentEmployee?.DepartmentId,
+                    currentEmployee?.ManagerId
+                });
+
+                if (response.IsSuccessStatusCode)
+                {
+                    log.LogInformation("Updated {Employee}", currentEmployee);
+                    currentEmployee = null;
+                    StateHasChanged();
+                }
+                else
+                {
+                    errorMessage = "Unable to update employee";
+                    log.LogError("Unable to update {Employee} with reason {Reason}", currentEmployee, response.ReasonPhrase);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+            log.LogError(ex, "Error adding {Employee}", currentEmployee);
+        }
+        await InvokeAsync(StateHasChanged);
     }
 
     private void CancelChanges()

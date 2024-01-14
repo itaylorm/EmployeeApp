@@ -69,8 +69,8 @@
     <Build Include="StoredProcedures\spEmployees_GetAll.sql" />
     <Build Include="StoredProcedures\spDepartments_GetAll.sql" />
     <Build Include="StoredProcedures\spEmployees_GetById.sql" />
-    <Build Include="StoredProcedures\spEmployees_UpdateSalary.sql" />
     <Build Include="StoredProcedures\spEmployees_Exit.sql" />
+    <Build Include="StoredProcedures\spEmployees_Update.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Employee.publish.xml" />
