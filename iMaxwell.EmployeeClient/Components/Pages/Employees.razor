@@ -61,31 +61,42 @@ else if(employees != null && employees.Any() || currentEmployee != null)
                                     <label for="lastName" class="form-label text-primary ps-3">Last Name</label>
                                     <ValidationMessage For="@(() => currentEmployee.LastName)" />
                                 </div>
-                                    <div class="mb-3 col-6 form-floating">
-                                        <InputText class="form-control text-primary" id="title" @bind-Value="currentEmployee.Title" />
-                                        <label for="title" class="form-label text-primary ps-3">Title</label>
-                                        <ValidationMessage For="@(() => currentEmployee.Title)" />
-                                    </div>
-                                    <div class="mb-3 col-6 form-floating">
-                                        <InputNumber class="form-control text-primary" id="salary" @bind-Value="currentEmployee.Salary" />
-                                        <label for="salary" class="form-label text-primary ps-3">Yearly Salary</label>
-                                        <ValidationMessage For="@(() => currentEmployee.Salary)" />
-                                    </div>
-                                    <div class="mb-3 col-4 form-floating">
-                                        <InputDate class="form-control text-primary" id="hiredate" @bind-Value="currentEmployee.HireDate" />
-                                        <label for="hiredate" class="form-label text-primary ps-3">Hire Date</label>
-                                    </div>
-                                    <div class="mb-3 col-4 form-floating">
-                                        <InputDate class="form-control text-primary" id="exitDate" @bind-Value="currentEmployee.ExitDate" />
-                                        <label for="exitdate" class="form-label text-primary ps-3">Exit Date</label>
-                                    </div>
-                                    <div class="pt-3 col-3">
-                                    <InputCheckbox class="form-check-input text-primary" @bind-Value="currentEmployee.IsCurrent" />
-                                    <label class="form-check-label text-primary ps-3">Is Current</label>
-                                    </div>
+                                <div class="mb-3 col-6 form-floating">
+                                    <InputText class="form-control text-primary" id="title" @bind-Value="currentEmployee.Title" />
+                                    <label for="title" class="form-label text-primary ps-3">Title</label>
+                                    <ValidationMessage For="@(() => currentEmployee.Title)" />
+                                </div>
+                                <div class="mb-3 col-6 form-floating">
+                                    <InputNumber class="form-control text-primary" id="salary" @bind-Value="currentEmployee.Salary" />
+                                    <label for="salary" class="form-label text-primary ps-3">Yearly Salary</label>
+                                    <ValidationMessage For="@(() => currentEmployee.Salary)" />
+                                </div>
+                                <div class="mb-3 col-4 form-floating">
+                                    <InputDate class="form-control text-primary" id="hiredate" @bind-Value="currentEmployee.HireDate" />
+                                    <label for="hiredate" class="form-label text-primary ps-3">Hire Date</label>
+                                </div>
+                                <div class="mb-3 col-4 form-floating">
+                                    <InputDate class="form-control text-primary" id="exitDate" @bind-Value="currentEmployee.ExitDate" />
+                                    <label for="exitdate" class="form-label text-primary ps-3">Exit Date</label>
+                                </div>
+                                <div class="pt-3 col-3">
+                                <InputCheckbox disabled="@true" class="form-check-input text-primary" @bind-Value="currentEmployee.IsCurrent" />
+                                <label class="form-check-label text-primary ps-3 pt-2">Is Current</label>
+                                </div>
+                                 <div class="ms-2 mb-3 pb-2 col-6 border border-outline-primary">
+                                     <label class="form-label text-primary">Department:</label>
+                                     <br />
+                                     <InputSelect class="form-select" @bind-Value="currentEmployee.DepartmentId">
+                                         @foreach (var department in departments)
+                                        {
+                                            <option value="@department.Id">@department.Name</option>
+                                        }
+                                    </InputSelect>
+                                    <ValidationMessage For="@(() => currentEmployee.DepartmentId)" />
+                                </div>
                             </div>
-                            <button class="btn btn-danger" @onclick="CancelChanges">Cancel Changes</button>
-                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                            <button class="btn btn-danger" @onclick="CancelChanges">Cancel</button>
+                            <button type="submit" class="btn btn-primary">@submitText</button>
                         </EditForm>
                     </div>
                 }
@@ -108,9 +119,11 @@ else
 
 @code {
     private IQueryable<Employee>? employees;
+    private List<Department>? departments;
     private HttpClient? client;
     private string? errorMessage;
     private Employee? currentEmployee;
+    private string? submitText;
 
     GridSort<Employee> sortByFirstName = GridSort<Employee>
      .ByDescending(p => p.FirstName);
@@ -128,6 +141,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         await GetEmployees();
+        await GetDepartments();
     }
 
     private async Task GetEmployees()
@@ -154,13 +168,35 @@ else
         await InvokeAsync(StateHasChanged);
     }
 
+    private async Task GetDepartments()
+    {
+        errorMessage = string.Empty;
+        departments = null;
+        client = factory.CreateClient("api");
+        client.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", tokenInfo.Token);
+
+        try
+        {
+            departments = await client.GetFromJsonAsync<List<Department>>("departments");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+            log.LogError(ex, "Error getting departments");
+        }
+        await InvokeAsync(StateHasChanged);
+    }
+
     private void AddEmployee()
     {
+        submitText = "Add Employee";
         currentEmployee = new Employee();
     }
 
     private void EditEmployee(Employee employee)
     {
+        submitText = "Save Changes";
         currentEmployee = employee;
     }
 
