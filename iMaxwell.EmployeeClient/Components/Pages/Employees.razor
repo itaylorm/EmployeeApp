@@ -260,12 +260,13 @@ else
                     {
                         employees = new List<Employee>().AsQueryable();
                     };
-
-                    employees.Append(currentEmployee);
+                    var currentEmployees = new List<Employee>(employees);
+                    currentEmployees.Add(currentEmployee);
+                    employees = currentEmployees.AsQueryable();
 
                     log.LogInformation("Added {Employee}", currentEmployee);
                     currentEmployee = null;
-                    StateHasChanged();
+                    await InvokeAsync(() => StateHasChanged());
                 }
                 else {
                     errorMessage = "Unable to add employee";
@@ -309,8 +310,8 @@ else
                 if (response.IsSuccessStatusCode)
                 {
                     log.LogInformation("Updated {Employee}", currentEmployee);
-                    currentEmployee = null;
-                    StateHasChanged();
+
+                    await InvokeAsync(() => StateHasChanged());
                 }
                 else
                 {
@@ -324,7 +325,6 @@ else
             errorMessage = ex.Message;
             log.LogError(ex, "Error adding {Employee}", currentEmployee);
         }
-        await InvokeAsync(StateHasChanged);
     }
 
     private void CancelChanges()
