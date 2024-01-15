@@ -22,8 +22,8 @@ else if(employees != null && employees.Any() || currentEmployee != null)
 {
     <div class="container-fluid">
         <div class="row">
-            <div class="col-7">
-                <QuickGrid Items="@employees">
+            <div class="col-8">
+                <QuickGrid Items="@employees.AsQueryable()">
                     <TemplateColumn Title="First Name" SortBy="@sortByFirstName">
                         <div class="flex-column items-center">@context.FirstName</div>
                     </TemplateColumn>
@@ -39,7 +39,8 @@ else if(employees != null && employees.Any() || currentEmployee != null)
                     <TemplateColumn Title="Actions">
                         <div class="flex-column items-center">
                             <button class="btn btn-primary" @onclick="()=>StartEditEmployee(context)">Edit</button>
-                            <button class="btn btn-danger" @onclick="()=>ExitEmployee(context)">Exit</button>
+                            <button class="btn btn-danger" @onclick="()=>DeleteEmployee(context)">Delete</button>
+                            <button class="btn btn-warning" @onclick="()=>ExitEmployee(context)">Exit</button>
                         </div>
                     </TemplateColumn>
                 </QuickGrid>
@@ -119,7 +120,7 @@ else
 }
 
 @code {
-    private IQueryable<Employee>? employees;
+    private List<Employee>? employees;
     private List<Department>? departments;
     private HttpClient? client;
     private string? errorMessage;
@@ -155,11 +156,7 @@ else
 
         try
         {
-            var returnedEmployees = await client.GetFromJsonAsync<List<Employee>>("employees");
-            if(returnedEmployees != null)
-            {
-                employees = returnedEmployees.AsQueryable();
-            }
+            employees = await client.GetFromJsonAsync<List<Employee>>("employees");
         }
         catch (Exception ex)
         {
@@ -204,6 +201,41 @@ else
     private void ExitEmployee(Employee employee)
     {
         currentEmployee = employee;
+    }
+
+    private async Task DeleteEmployee(Employee employee)
+    {
+        errorMessage = string.Empty;
+        client = factory.CreateClient("api");
+        client.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", tokenInfo.Token);
+
+        try
+        {
+            if (employee != null)
+            {
+                var response = await client.DeleteAsync($"employees/{employee.Id}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var deletedEmployee = employees.FirstOrDefault(e => e.Id == employee.Id);
+                    employees.Remove(employee);
+                    log.LogInformation("Deleted employee with id {id}", employee.Id);
+                    
+                    await InvokeAsync(() => StateHasChanged());
+                }
+                else
+                {
+                    errorMessage = "Unable to update employee";
+                    log.LogError("Unable to delete employee with Id {Id} with reason {Reason}", employee.Id, response.ReasonPhrase);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+            log.LogError(ex, "Error deleting employee with Id {id}", employee.Id);
+        }
     }
 
     private async Task SaveChanges()
@@ -258,11 +290,9 @@ else
 
                     if(employees == null)
                     {
-                        employees = new List<Employee>().AsQueryable();
+                        employees = new List<Employee>();
                     };
-                    var currentEmployees = new List<Employee>(employees);
-                    currentEmployees.Add(currentEmployee);
-                    employees = currentEmployees.AsQueryable();
+                    employees.Add(currentEmployee);
 
                     log.LogInformation("Added {Employee}", currentEmployee);
                     currentEmployee = null;

@@ -71,6 +71,7 @@
     <Build Include="StoredProcedures\spEmployees_GetById.sql" />
     <Build Include="StoredProcedures\spEmployees_Exit.sql" />
     <Build Include="StoredProcedures\spEmployees_Update.sql" />
+    <Build Include="StoredProcedures\spEmployees_Delete.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Employee.publish.xml" />

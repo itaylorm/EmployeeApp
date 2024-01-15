@@ -105,4 +105,21 @@ public class EmployeesController : ControllerBase
             return BadRequest();
         }
     }
+
+    // PUT api/v1/Employees/5
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        try
+        {
+            _log.LogInformation("DELETE: api/v1/employees/{id}", id);
+            await _data.DeleteEmployee(id);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            _log.LogError(ex, "The DELETE call to api/v1/employees/{Id} failed.", id);
+            return BadRequest();
+        }
+    }
 }

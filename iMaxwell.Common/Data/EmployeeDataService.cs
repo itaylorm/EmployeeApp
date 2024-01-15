@@ -92,6 +92,11 @@ public class EmployeeDataService : IEmployeeDataService
             employee.Salary
         }, ConnectionStringName);
     }
+    public async Task DeleteEmployee(int id)
+    {
+        await _sql.SaveDataAsync("dbo.spEmployees_Delete", new { Id = id}, ConnectionStringName);
+    }
+
     public async Task ExitEmployee(int id)
     {
         await _sql.SaveDataAsync("dbo.spEmployees_Exit", new { Id = id, ExitDate = DateTime.UtcNow }, ConnectionStringName);
