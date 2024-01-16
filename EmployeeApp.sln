@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "iMaxwell.Common", "iMaxwell
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "iMaxwell.EmployeeApi", "iMaxwell.EmployeeApi\iMaxwell.EmployeeApi.csproj", "{E67F5697-46B7-40DC-BF0C-FC0497D43186}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iMaxwell.EmployeeClient", "iMaxwell.EmployeeClient\iMaxwell.EmployeeClient.csproj", "{9D930075-088A-4790-A78E-7FE2A68D820E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "iMaxwell.EmployeeClient", "iMaxwell.EmployeeClient\iMaxwell.EmployeeClient.csproj", "{9D930075-088A-4790-A78E-7FE2A68D820E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

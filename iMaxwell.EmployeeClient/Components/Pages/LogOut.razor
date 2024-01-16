@@ -1,0 +1,44 @@
+﻿@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@using iMaxwell.EmployeeClient.Models
+@inject NavigationManager NavManager
+@inject TokenModel tokenInfo
+@implements IDisposable
+
+<div>
+
+    @if(tokenInfo.LoggedIn)
+    {
+        @ShowWelcome()
+        <button class="btn btn-danger ms-4" @onclick="LogOff">Logout</button>
+    }
+</div>
+@code {
+    protected override void OnInitialized()
+    {
+        tokenInfo.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        tokenInfo.OnChange -= StateHasChanged;
+    }
+
+    private void LogOff()
+    {
+        tokenInfo.Token = null;
+        tokenInfo.UserName = null;
+        tokenInfo.LoggedIn = false;
+        NavManager.NavigateTo("");
+    }
+
+    private string ShowWelcome()
+    {
+        if (tokenInfo.LoggedIn)
+        {
+            return $"Welcome {tokenInfo.UserName}";
+        }
+
+        return "";
+
+    }
+}

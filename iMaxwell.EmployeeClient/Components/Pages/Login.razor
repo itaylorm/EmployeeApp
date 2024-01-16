@@ -3,8 +3,10 @@
 
 @using System.Net.Http.Json
 @using iMaxwell.EmployeeClient.Models
+@inject NavigationManager NavManager
 @inject IHttpClientFactory factory
 @inject TokenModel tokenInfo
+@implements IDisposable
 
 <PageTitle>Login</PageTitle>
 
@@ -62,7 +64,13 @@ else
 
     protected override void OnInitialized()
     {
+        tokenInfo.OnChange += StateHasChanged;
         tokenInfo.LoggedIn = !string.IsNullOrWhiteSpace(tokenInfo.Token);
+    }
+
+    public void Dispose()
+    {
+        tokenInfo.OnChange -= StateHasChanged;
     }
 
     private async Task HandleValidSubmit()
@@ -72,6 +80,7 @@ else
         tokenInfo.Token = await response.Content.ReadAsStringAsync();
         tokenInfo.UserName = login.Username;
         tokenInfo.LoggedIn = true;
+        NavManager.NavigateTo("employees");
         await InvokeAsync(StateHasChanged);
     }
 

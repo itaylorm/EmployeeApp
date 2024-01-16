@@ -14,10 +14,13 @@
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="flex-column">
         <div class="nav-item px-3">
-            <NavLink class="nav-link ps-3" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> @DefineTitle()
-            </NavLink>
-            @if(tokenInfo.LoggedIn)
+            @if(!tokenInfo.LoggedIn)
+            {
+                <NavLink class="nav-link ps-3" href="" Match="NavLinkMatch.All">
+                    <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Login
+                </NavLink>
+            }
+            else
             {
                 <NavLink class="nav-link ps-3" href="employees" Match="NavLinkMatch.All">
                     <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Employees
@@ -36,16 +39,5 @@
     public void Dispose()
     {
         tokenInfo.OnChange -= StateHasChanged;
-    }
-
-    private string DefineTitle()
-    {
-        if(tokenInfo.LoggedIn)
-        {
-            return $"Welcome {tokenInfo.UserName}";
-        }
-
-        return "Login";
-
     }
 }
