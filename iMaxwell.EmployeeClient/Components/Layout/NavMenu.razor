@@ -1,4 +1,9 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@using iMaxwell.EmployeeClient.Models
+@inject TokenModel tokenInfo
+@implements IDisposable
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">Employees</a>
     </div>
@@ -9,13 +14,38 @@
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="flex-column">
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Login
+            <NavLink class="nav-link ps-3" href="" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> @DefineTitle()
             </NavLink>
-            <NavLink class="nav-link" href="employees" Match="NavLinkMatch.All">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Employees
-            </NavLink>
+            @if(tokenInfo.LoggedIn)
+            {
+                <NavLink class="nav-link ps-3" href="employees" Match="NavLinkMatch.All">
+                    <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Employees
+                </NavLink>
+            }
         </div>
     </nav>
 </div>
 
+@code {
+    protected override void OnInitialized()
+    {
+        tokenInfo.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        tokenInfo.OnChange -= StateHasChanged;
+    }
+
+    private string DefineTitle()
+    {
+        if(tokenInfo.LoggedIn)
+        {
+            return $"Welcome {tokenInfo.UserName}";
+        }
+
+        return "Login";
+
+    }
+}

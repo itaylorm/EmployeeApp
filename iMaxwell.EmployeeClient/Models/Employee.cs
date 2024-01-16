@@ -35,7 +35,7 @@ namespace iMaxwell.EmployeeClient.Models
 
         [Required(ErrorMessage = "The Hire Date is required")]
         [DisplayName("Hire Date")]
-        public DateTime HireDate { get; set; }
+        public DateTime HireDate { get; set; } = DateTime.UtcNow;
 
         public DateTime? ExitDate { get; set; }
 

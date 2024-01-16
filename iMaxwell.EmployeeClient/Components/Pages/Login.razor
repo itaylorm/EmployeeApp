@@ -8,7 +8,7 @@
 
 <PageTitle>Login</PageTitle>
 
-@if (isLoggedIn)
+@if (tokenInfo.LoggedIn)
 {
     <div class="container">
         <div class="row">
@@ -21,11 +21,9 @@
 
         </div>
     </div>
-
 }
 else
 {
-
     <EditForm Model="login" FormName="loginForm" OnValidSubmit="HandleValidSubmit">
         <DataAnnotationsValidator />
         <ValidationSummary />
@@ -61,11 +59,10 @@ else
 
 @code {
     private AuthenticationModel login = new();
-    private bool isLoggedIn;
 
     protected override void OnInitialized()
     {
-        isLoggedIn = !string.IsNullOrWhiteSpace(tokenInfo.Token);
+        tokenInfo.LoggedIn = !string.IsNullOrWhiteSpace(tokenInfo.Token);
     }
 
     private async Task HandleValidSubmit()
@@ -73,13 +70,14 @@ else
         var client = factory.CreateClient("api");
         var response = await client.PostAsJsonAsync<AuthenticationModel>("Authentication/token", login);
         tokenInfo.Token = await response.Content.ReadAsStringAsync();
-        isLoggedIn = true;
+        tokenInfo.UserName = login.Username;
+        tokenInfo.LoggedIn = true;
         await InvokeAsync(StateHasChanged);
     }
 
     private void LogOut()
     {
         tokenInfo.Token = string.Empty;
-        isLoggedIn = false;
+        tokenInfo.LoggedIn = false;
     }
 }

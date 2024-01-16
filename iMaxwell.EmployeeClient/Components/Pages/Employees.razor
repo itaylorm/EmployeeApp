@@ -18,11 +18,11 @@
         @errorMessage
     </div>
 }
-else if(employees != null && employees.Any() || currentEmployee != null)
+else if(employees != null && employees.Any() || (employees != null && currentEmployee != null))
 {
     <div class="container-fluid">
         <div class="row">
-            <div class="col-8">
+            <div class="col-7">
                 <QuickGrid Items="@employees.AsQueryable()">
                     <TemplateColumn Title="First Name" SortBy="@sortByFirstName">
                         <div class="flex-column items-center">@context.FirstName</div>
@@ -40,7 +40,7 @@ else if(employees != null && employees.Any() || currentEmployee != null)
                         <div class="flex-column items-center">
                             <button class="btn btn-primary" @onclick="()=>StartEditEmployee(context)">Edit</button>
                             <button class="btn btn-danger" @onclick="()=>DeleteEmployee(context)">Delete</button>
-                            <button class="btn btn-warning" @onclick="()=>ExitEmployee(context)">Exit</button>
+                            <button class="btn btn-warning" @onclick="()=>ExitEmployee(context)">Terminate</button>
                         </div>
                     </TemplateColumn>
                 </QuickGrid>
@@ -80,10 +80,6 @@ else if(employees != null && employees.Any() || currentEmployee != null)
                                 <div class="mb-3 col-4 form-floating">
                                     <InputDate class="form-control text-primary" id="exitDate" @bind-Value="currentEmployee.ExitDate" />
                                     <label for="exitdate" class="form-label text-primary ps-3">Exit Date</label>
-                                </div>
-                                <div class="pt-3 col-3">
-                                <InputCheckbox disabled="@true" class="form-check-input text-primary" @bind-Value="currentEmployee.IsCurrent" />
-                                <label class="form-check-label text-primary ps-3 pt-2">Is Current</label>
                                 </div>
                                  <div class="ms-2 mb-3 pb-2 col-6 border border-outline-primary">
                                      <label class="form-label text-primary">Department:</label>
